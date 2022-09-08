@@ -18,6 +18,7 @@ from posixpath import basename
 from django.contrib import admin
 from django.urls import path, include
 from projects.views import ProjectViewSet, ContributorViewSet, IssueViewset, CommentViewSet
+from authentication.views import SignupView, LoginView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_nested import routers
 
@@ -35,7 +36,9 @@ comment_router.register(r'comments', CommentViewSet, basename='comments')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
+    path('', include('rest_framework.urls')),
+    path('api/signup/', SignupView.as_view({'post': 'create'}), name='register'),
+    path('api/login/', LoginView.as_view(), name='register'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path(r'api/', include(router.urls)),

@@ -2,6 +2,8 @@ from tkinter import CASCADE
 from django.db import models
 from django.conf import settings
 
+from authentication.models import User
+
 
 class Project(models.Model):
     
@@ -23,9 +25,10 @@ class Project(models.Model):
     description = models.TextField(max_length=8192, blank=True)
     type = models.CharField(max_length=30, choices=TYPE_CHOICES, verbose_name='Type')
     created_time = models.DateTimeField(auto_now_add=True)
+    contributors_users = models.ManyToManyField(to=settings.AUTH_USER_MODEL, related_name='contributors_users', through='Contributor')
 
     def __str__(self):
-        return f"{self.project_id} - {self.title}"
+        return f"{self.project_id} - {self.title} "
 
 
 class Issue(models.Model):
@@ -78,7 +81,7 @@ class Issue(models.Model):
 class Comment(models.Model):
 
     comment_id  = models.BigAutoField(primary_key=True)
-    description = models.TextField(max_length=8192, blank=True)
+    description = models.TextField(max_length=8192, blank=False)
     author_user_id = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     issue_id = models.ForeignKey(to=Issue, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
@@ -86,8 +89,8 @@ class Comment(models.Model):
 
 class Contributor(models.Model):
 
-    user_id = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    project_id = models.ForeignKey(to=Project, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='contributors', on_delete=models.CASCADE)
+    project_id = models.ForeignKey(to=Project, related_name='contributors', on_delete=models.CASCADE)
     permission = models.CharField(max_length=128)
     role = models.CharField(max_length=128)
 
