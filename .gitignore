@@ -2,3 +2,5 @@ ENV
 P10_Softdesk.code-workspace
 softdesk/softdesk/__pycache__/
 __pycache__
+softdesk/.flake8
+softdesk/flake-report

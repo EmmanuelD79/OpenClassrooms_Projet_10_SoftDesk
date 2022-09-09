@@ -1,8 +1,11 @@
-from ast import And
-from urllib import request
 from .models import Contributor, Project, Issue, Comment
-from authentication.models import User
-from .serializers import ProjectSerializer, ContributorSerializer, ContributorListSerializer, IssueSerializer, CommentSerializer, CommentListSerializer, IssueListSerializer
+from .serializers import ProjectSerializer,\
+        ContributorSerializer,\
+        ContributorListSerializer,\
+        IssueSerializer,\
+        CommentSerializer,\
+        CommentListSerializer,\
+        IssueListSerializer
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAuthor, IsContributor
@@ -11,10 +14,9 @@ from django.shortcuts import get_object_or_404
 
 
 class ProjectViewSet(viewsets.ViewSet):
-    
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    
+
     def get_object(self):
         obj = get_object_or_404(Project.objects.all(), project_id=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
@@ -23,7 +25,7 @@ class ProjectViewSet(viewsets.ViewSet):
     def get_permissions(self):
         if self.action in ['retrieve']:
             self.permission_classes = [IsAuthor | IsContributor]
-        elif self.action in ['list','update', 'destroy']:
+        elif self.action in ['list', 'update', 'destroy']:
             self.permission_classes = [IsAuthor]
         elif self.action in ['create']:
             self.permission_classes = [IsAuthenticated]
@@ -33,7 +35,7 @@ class ProjectViewSet(viewsets.ViewSet):
         projects = Project.objects.filter(author_user_id=self.request.user)
         return projects.all()
 
-    def list(self, request,):
+    def list(self, request):
         queryset = self.get_queryset()
         serializer = ProjectSerializer(queryset, many=True)
         return Response(serializer.data)
@@ -43,7 +45,7 @@ class ProjectViewSet(viewsets.ViewSet):
         serializer = ProjectSerializer(project)
         return Response(serializer.data)
 
-    def create(self, request,):
+    def create(self, request):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
@@ -52,7 +54,7 @@ class ProjectViewSet(viewsets.ViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author_user_id=self.request.user)
-  
+
     def update(self, request, pk=None):
         project = self.get_object()
         serializer = ProjectSerializer(project, data=request.data)
@@ -60,7 +62,7 @@ class ProjectViewSet(viewsets.ViewSet):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def destroy(self, request, pk=None):
         project = self.get_object()
         project.delete()
@@ -68,8 +70,6 @@ class ProjectViewSet(viewsets.ViewSet):
 
 
 class ContributorViewSet(viewsets.ViewSet):
-    #serializer_class = ContributorSerializer
-
     def get_permissions(self):
         if self.action in ['list']:
             self.permission_classes = [IsAuthor | IsContributor]
@@ -89,19 +89,18 @@ class ContributorViewSet(viewsets.ViewSet):
             self.perform_create(serializer, project)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def perform_create(self, serializer, project):
         serializer.save(project_id=project)
-    
+
     def destroy(self, request, pk=None, project_pk=None):
         queryset = Contributor.objects.filter(user_id=pk, project_id=project_pk)
         contributor = get_object_or_404(queryset, user_id=pk)
         contributor.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
 
 class IssueViewset(viewsets.ViewSet):
-
     serializer_class = IssueSerializer
 
     def get_permissions(self):
@@ -112,7 +111,7 @@ class IssueViewset(viewsets.ViewSet):
         elif self.action in ['create']:
             self.permission_classes = [IsAuthor | IsContributor]
         return super().get_permissions()
-    
+
     def list(self, request, project_pk=None):
         queryset = Issue.objects.filter(project_id=project_pk)
         serializer = IssueListSerializer(queryset, many=True)
@@ -127,7 +126,7 @@ class IssueViewset(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer, project):
-        serializer.save(project_id=project,author_user_id=self.request.user)
+        serializer.save(project_id=project, author_user_id=self.request.user)
 
     def update(self, request, pk=None, project_pk=None):
         queryset = Issue.objects.filter(id=pk, project_id=project_pk)
@@ -137,7 +136,7 @@ class IssueViewset(viewsets.ViewSet):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def destroy(self, request, pk=None, project_pk=None):
         queryset = Issue.objects.filter(id=pk, project_id=project_pk)
         issue = get_object_or_404(queryset, id=pk)
@@ -149,8 +148,8 @@ class CommentViewSet(viewsets.ViewSet):
     serializer_class = CommentSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve','create']:
-            self.permission_classes = [ IsAuthor | IsContributor]
+        if self.action in ['list', 'retrieve', 'create']:
+            self.permission_classes = [IsAuthor | IsContributor]
         elif self.action in ['update', 'destroy']:
             self.permission_classes = [IsAuthor]
         return super().get_permissions()
@@ -176,7 +175,7 @@ class CommentViewSet(viewsets.ViewSet):
 
     def perform_create(self, serializer, issue):
         serializer.save(issue_id=issue, author_user_id=self.request.user)
-    
+
     def update(self, request, pk=None, project_pk=None, issue_pk=None):
         queryset = Comment.objects.filter(comment_id=pk, issue_id=issue_pk)
         comment = get_object_or_404(queryset, comment_id=pk)

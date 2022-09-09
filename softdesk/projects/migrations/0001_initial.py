@@ -170,6 +170,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"unique_together": {("user_pk", "project_pk")},},
+            options={"unique_together": {("user_pk", "project_pk")}, },
         ),
     ]

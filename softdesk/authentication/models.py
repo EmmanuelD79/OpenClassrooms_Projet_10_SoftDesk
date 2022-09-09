@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 
 class UserManager(BaseUserManager):
     """Define a model manager for User model with no username field."""
-
     use_in_migrations = True
 
     def _create_user(self, email, password, **extra_fields):
@@ -38,7 +37,12 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
-
+    '''User Model with attribut:
+        - user_id
+        - email (username replace by email)
+        - first_name (required attribut)
+        - last_name (required attribut)
+    '''
     user_id = models.BigAutoField(primary_key=True)
     email = models.EmailField(_('email'), unique=True)
     first_name = models.TextField(blank=False)

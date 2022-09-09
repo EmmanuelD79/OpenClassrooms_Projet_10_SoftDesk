@@ -2,14 +2,12 @@ from authentication.models import User
 from authentication.serializers import UserSerializer, SignupSerializer
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate, login
-from django.http import HttpResponse
 from rest_framework import status, viewsets, response
 from .utils import get_tokens_for_user
 from rest_framework.permissions import AllowAny
 
 
 class UserViewset(viewsets.ModelViewSet):
-
     serializer_class = UserSerializer
 
     def get_queryset(self):
@@ -17,11 +15,9 @@ class UserViewset(viewsets.ModelViewSet):
 
 
 class SignupView(viewsets.ViewSet):
-
     permission_classes = (AllowAny,)
     serializer_class = SignupSerializer
-    authentication_classes= []
-
+    authentication_classes = []
 
     def create(self, request, *args, **kwargs):
         serializer = SignupSerializer(data=request.data)
@@ -34,9 +30,8 @@ class SignupView(viewsets.ViewSet):
 
 
 class LoginView(APIView):
-
     permission_classes = (AllowAny,)
-    authentication_classes= []
+    authentication_classes = []
 
     def post(self, request):
         if 'email' not in request.data or 'password' not in request.data:
@@ -49,4 +44,3 @@ class LoginView(APIView):
             tokens = get_tokens_for_user(request.user)
             return response.Response({'msg': 'Login Success', **tokens}, status=status.HTTP_200_OK)
         return response.Response({'msg': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-        
