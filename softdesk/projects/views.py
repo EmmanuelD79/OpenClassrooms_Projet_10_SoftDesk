@@ -130,12 +130,16 @@ class IssueViewset(viewsets.ViewSet):
 
     def update(self, request, pk=None, project_pk=None):
         queryset = Issue.objects.filter(id=pk, project_id=project_pk)
+        project = get_object_or_404(Project.objects.filter(project_id=project_pk))
         issue = get_object_or_404(queryset, id=pk)
         serializer = IssueSerializer(issue, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            self.perform_update(serializer, project)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_update(self, serializer, project):
+        serializer.save(project_id=project)
 
     def destroy(self, request, pk=None, project_pk=None):
         queryset = Issue.objects.filter(id=pk, project_id=project_pk)
