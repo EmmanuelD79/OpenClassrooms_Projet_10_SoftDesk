@@ -45,8 +45,6 @@ class ContributorSerializer(serializers.ModelSerializer):
 
         is_contributor = contributors.filter(user_id=active_user.user_id).exists()
 
-        user = User.objects.filter(email=email)
-
         if project.author_user_id == active_user:
             raise serializers.ValidationError({'user': "User is the author"})
         elif is_contributor:
@@ -74,22 +72,39 @@ class IssueSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Issue
-        fields = ['title', 'desc', 'tag', 'priority', 'status', 'assignee_user_email']
+        fields = ['id', 'title', 'desc', 'tag', 'priority', 'status', 'assignee_user_email']
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'assignee_user_email' : { 'write_only' : True}, 
+        }
 
     def create(self, validated_data):
         assignee_user_email = validated_data.pop('assignee_user_email')
+        project = validated_data['project_id']
+        contributors = project.contributors.all()
+
         user = User.objects.filter(email=assignee_user_email)
-        if not user:
-            raise serializers.ValidationError({'user': "User don't assignee"})
-        validated_data['assignee_user_id'] = get_object_or_404(user)
+        assignee_user = get_object_or_404(user)
+
+        is_contributor = contributors.filter(user_id=assignee_user.user_id).exists()
+        if not is_contributor:
+            raise serializers.ValidationError({'user': "Assignee user isn't contributor"})
+        validated_data['assignee_user_id'] = assignee_user
+
         return Issue.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         assignee_user_email = validated_data.pop('assignee_user_email')
+        project = validated_data['project_id']
+        contributors = project.contributors.all()
+
         user = User.objects.filter(email=assignee_user_email)
-        if not user:
-            raise serializers.ValidationError({'user': "User don't assignee"})
-        validated_data['assignee_user_id'] = get_object_or_404(user)
+        assignee_user = get_object_or_404(user)
+
+        is_contributor = contributors.filter(user_id=assignee_user.user_id).exists()
+        if not is_contributor:
+            raise serializers.ValidationError({'user': "Assignee user isn't contributor"})
+        validated_data['assignee_user_id'] = assignee_user
         instance.assignee_user_id = validated_data.get('assignee_user_id', instance.assignee_user_id)
         instance.title = validated_data.get('title', instance.title)
         instance.desc = validated_data.get('desc', instance.desc)
@@ -98,7 +113,7 @@ class IssueSerializer(serializers.ModelSerializer):
         instance.status = validated_data.get('status', instance.status)
         instance.save()
         return instance
-
+        
 
 class CommentSerializer(serializers.ModelSerializer):
     parent_lookup_kwargs = {
@@ -107,7 +122,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['description']
+        fields = ['comment_id', 'description']
+        extra_kwargs = {
+            'comment_id': {'read_only': True}
+        }
 
 
 class CommentListSerializer(serializers.ModelSerializer):
