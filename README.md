@@ -100,6 +100,7 @@ Pour démarrer le projet, vous devez aller dans le répertoire du projet et tape
 
 ```
 
+python manage.py makemigrations
 python manage.py migrate
 python manage.py runserver
 
