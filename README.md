@@ -19,7 +19,7 @@ Créer une API sécurisée REST avec DJANGO REST-FRAMEWORK permettant :
 
 ## **Documentation**:
 
-La documentation de l'API est accessible à l'adresse : https://documenter.getpostman.com/view/23145404/VVBWTRjv
+La documentation de l'API est accessible à l'adresse : https://documenter.getpostman.com/view/23145404/2s935pq3eS
 
 Vous y trouverez la définition de chaque endpoint avec les données à fournir et les réponses attendues.
 
